@@ -68,7 +68,7 @@ def lambda_handler(event, context):
             command = body.get('data').get('name')
             options = body.get('data').get('options')
             if len(options) > 0:
-                option = options[0].get('value')
+                option = options[0].get('name')
                 if option == "start":
                     response = client.start_instances(InstanceIds=['i-04df84ad62747443e'])
                     (current_state, previous_state) = process_instance_state_object(response, 'StartingInstances')
@@ -89,6 +89,17 @@ def lambda_handler(event, context):
                         "data": {
                             "tts": False,
                             "content": f"Stopping server. Previous state: {previous_state}. Current state: {current_state}",
+                            "embeds": [],
+                            "allowed_mentions": []
+                        }
+                    };
+                elif option == "whitelist":
+                    user = options[0].get('options')[0].get('name')
+                    resp = {
+                        "type": RESPONSE_TYPES['MESSAGE_WITH_SOURCE'],
+                        "data": {
+                            "tts": False,
+                            "content": f"Whitelisting {user}. Not implemented",
                             "embeds": [],
                             "allowed_mentions": []
                         }
