@@ -1,11 +1,15 @@
-import json
 import boto3
+from botocore.client import Config
+import rcon
+from public_key import PUBLIC_KEY
 
-client = boto3.client('ec2')
+config = Config(connect_timeout=0.5,
+                retries={'max_attempts': 0})
+client = boto3.client('ec2',
+                      config=config,
+                      )
 
 from nacl.signing import VerifyKey
-from nacl.exceptions import BadSignatureError
-from public_key import PUBLIC_KEY
 
 PING_PONG = {"type": 1}
 RESPONSE_TYPES =  { 
@@ -16,7 +20,6 @@ RESPONSE_TYPES =  {
                     "ACK_WITH_SOURCE": 5
                   }
 #PUBLIC_KEY = '' # found on Discord Application -> General Information page
-
 
 def verify_signature(event):
     raw_body = event.get("rawBody")
@@ -38,8 +41,8 @@ def process_instance_state_object(obj, typ):
         return ('Unknown', 'Unknown')
     return (ls[0].get('CurrentState', {}).get('Name', 'Unknown'),
             ls[0].get('PreviousState', {}).get('Name', 'Unknown'))
-    
-def lambda_handler(event, context):
+
+def lambda_handler(event, _):
     print(f"event {event}") # debug print
     # verify the signature
     try:
@@ -94,12 +97,12 @@ def lambda_handler(event, context):
                         }
                     };
                 elif option == "whitelist":
-                    user = options[0].get('options')[0].get('name')
+                    user = options[0].get('options')[0].get('value')
                     resp = {
                         "type": RESPONSE_TYPES['MESSAGE_WITH_SOURCE'],
                         "data": {
                             "tts": False,
-                            "content": f"Whitelisting {user}. Not implemented",
+                            "content": f"Whitelisting {user} -- {whitelist_request(user)}",
                             "embeds": [],
                             "allowed_mentions": []
                         }
@@ -127,4 +130,7 @@ def lambda_handler(event, context):
 
     print(f"response {resp}") #debug print
     return resp;
-   
+
+
+def whitelist_request(user):
+    return rcon.request(f"whitelist add {rcon.sanitize_user(user)}")
