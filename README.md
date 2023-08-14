@@ -3,6 +3,7 @@ A discord bot for managing a Minecraft server
 
 ## Setting up the discord bot
 Refer to a bunch of tutorials. Will link these here later
+
 Source: https://oozio.medium.com/serverless-discord-bot-55f95f26f743
 
 ## Setting up the AWS Lambda function
